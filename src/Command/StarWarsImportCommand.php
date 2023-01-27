@@ -35,7 +35,7 @@ class StarWarsImportCommand extends Command
         $movies = $this->fetchMoviesAPI();
         $this->saveMoviesToDoctrine($movies);
 
-        $characters = $this->fetchAPI();
+        $characters = $this->fetchCharactersAPI();
         $this->saveCharactersToDoctrine($characters);
 
         return Command::SUCCESS;
@@ -98,7 +98,7 @@ class StarWarsImportCommand extends Command
         return sprintf("https://starwars-visualguide.com/assets/img/characters/%d.jpg", $id);
     }
 
-    protected function fetchAPI( int $currentPage = 1, int $toPage = 3 ): array
+    protected function fetchCharactersAPI( int $currentPage = 1, int $toPage = 3 ): array
     {
         $client = new Client([
             'base_uri' => 'https://swapi.dev/api/',
