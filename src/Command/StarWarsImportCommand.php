@@ -66,17 +66,19 @@ class StarWarsImportCommand extends Command
         foreach ($characters as $characterData) {
             $character = new Character();
             $character->setName($characterData['name']);
-            $character->setMass($characterData['mass']);
-            $character->setHeight($characterData['height']);
+            $character->setMass((int) $characterData['mass']);
+            $character->setHeight((int) $characterData['height']);
             $character->setGender($characterData['gender']);
             $character->setPicture($this->getPicture($characterData['url']));
 
             foreach ( $characterData['films'] as $film ) {
-                // Fetch ID from last part of URL
-                $id = substr($film, strrpos($film, '/') + 1);
+                // Fetch ID from last part of URL with trailing slash
+                $id = (int) substr($film, -2, 1);
 
-                $movie = $this->em->getRepository(Movie::class)->findOneBy(['id' => $id]);
-                $character->addMovie($movie);
+                // Fetch all movies from database
+                $movies = $this->em->getRepository(Movie::class)->findAll();
+
+                $character->addMovie($movies[$id - 1]);
             }
 
             $this->em->persist($character);
@@ -86,8 +88,12 @@ class StarWarsImportCommand extends Command
     }
 
     protected function getPicture( string $url ): string {
-        // The ID is in the last part of the URL
-        $id = substr($url, strrpos($url, '/') + 1);
+        // Remove trailing slash
+        $url = substr($url, 0, -1);
+
+        $parts = explode('/', $url);
+
+        $id = $parts[count($parts) - 1];
 
         return sprintf("https://starwars-visualguide.com/assets/img/characters/%d.jpg", $id);
     }
